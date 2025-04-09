@@ -1,3 +1,4 @@
+
 from pydantic_settings import BaseSettings
 from pydantic import Field
 from typing import Optional
@@ -18,16 +19,6 @@ class Settings(BaseSettings):
     REFINEMENT_ENCRYPTION_KEY: str = Field(
         default=None,
         description="Key to symmetrically encrypt the refinement. This is derived from the original file encryption key"
-    )
-    
-    PINATA_API_KEY: Optional[str] = Field(
-        default=None,
-        description="Pinata API key"
-    )
-    
-    PINATA_API_SECRET: Optional[str] = Field(
-        default=None,
-        description="Pinata API secret"
     )
     
     SCHEMA_NAME: str = Field(
