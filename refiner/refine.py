@@ -1,3 +1,4 @@
+
 import json
 import logging
 import os
@@ -16,7 +17,7 @@ class Refiner:
     def transform(self) -> Output:
         """Transform all input files into the database."""
         logging.info("Starting data transformation")
-        output = Output()
+        output = None
 
         # Iterate through files and transform data
         for input_filename in os.listdir(settings.INPUT_DIR):
@@ -25,7 +26,7 @@ class Refiner:
                 with open(input_file, 'r') as f:
                     input_data = json.load(f)
 
-                    # Transform account data
+                    # Transform data
                     transformer = UserTransformer(self.db_path)
                     transformer.process(input_data)
                     logging.info(f"Transformed {input_filename}")
@@ -38,7 +39,14 @@ class Refiner:
                         dialect=settings.SCHEMA_DIALECT,
                         schema=transformer.get_schema()
                     )
-                    output.schema = schema
+                    
+                    # Create output with the same structure as input
+                    output = Output(
+                        date=input_data["date"],
+                        files=input_data["files"],
+                        owner=input_data["owner"],
+                        schema=schema
+                    )
                         
                     # Upload the schema to IPFS
                     schema_file = os.path.join(settings.OUTPUT_DIR, 'schema.json')
@@ -52,6 +60,9 @@ class Refiner:
                     ipfs_hash = upload_file_to_ipfs(encrypted_path)
                     output.refinement_url = f"https://ipfs.vana.org/ipfs/{ipfs_hash}"
                     continue
+
+        if output is None:
+            raise ValueError("No valid input data found for transformation")
 
         logging.info("Data transformation completed successfully")
         return output
